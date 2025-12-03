@@ -2,14 +2,14 @@ import AdminMenu from "../../components/Layout/AdminMenu";
 
 export default function AdminDashboard() {
   return (
-    <div className="flex min-h-screen bg-black text-white">
+    <div className="flex min-h-screen bg-white text-white">
 
       {/* LEFT ADMIN SIDEBAR */}
       <AdminMenu />
 
       {/* RIGHT CONTENT AREA */}
-      <div className="flex-1 p-8">
-        <h1 className="text-3xl font-bold text-yellow-500 mb-6">
+      <div className="flex-1 p-18 pt-14 px-9 pt-25">
+        <h1 className="text-3xl font-bold text-yellow-500 mb-6 text-center">
           Welcome, Admin!
         </h1>
 

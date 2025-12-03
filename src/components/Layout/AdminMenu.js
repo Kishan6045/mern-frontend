@@ -1,10 +1,12 @@
 import { NavLink } from "react-router-dom";
+import Lay from "./Lay";
 
 export default function AdminMenu() {
   return (
-    <div className="w-64 min-h-screen bg-[#111] text-white p-5">
+    <Lay>
+    <div className=" w-full h-full bg-[#1f1f1e] text-white p-5">
 
-      <h2 className="text-xl font-bold mb-6 text-yellow-500">Admin Panel</h2>
+      <h2 className="text-xl font-bold mb-6 pt-11 text-yellow-500">Admin Panel</h2>
 
       <div className="flex flex-col space-y-4 text-lg">
 
@@ -53,5 +55,6 @@ export default function AdminMenu() {
 
       </div>
     </div>
+    </Lay>
   );
 }
