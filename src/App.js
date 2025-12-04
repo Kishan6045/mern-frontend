@@ -24,6 +24,10 @@ import CreateProduct from "./pages/admin/CreateProduct";
 import ManageUsers from "./pages/admin/ManageUsers";
 import AdminProducts from "./pages/admin/AdminProducts";
 import AdminOrders from "./pages/admin/AdminOrders";
+import AdminAnalytics from "./pages/admin/AdminAnalytics";
+import EditProduct from "./pages/admin/EditProduct";
+
+
 
 import { CartProvider } from "./context/cart";
 
@@ -55,6 +59,16 @@ function App() {
           <Route path="/dashboard/admin/create-category" element={<AdminRoute><CreateCategory /></AdminRoute>} />
           <Route path="/dashboard/admin/create-product" element={<AdminRoute><CreateProduct /></AdminRoute>} />
           <Route path="/dashboard/admin/products" element={<AdminRoute><AdminProducts /></AdminRoute>} />
+          <Route path="/dashboard/admin/products/:slug" element={<EditProduct />} />
+
+          <Route
+  path="/dashboard/admin/analytics"
+  element={
+    <AdminRoute>
+      <AdminAnalytics />
+    </AdminRoute>
+  }
+/>
           <Route path="/dashboard/admin/orders" element={<AdminRoute><AdminOrders /></AdminRoute>} />
           <Route path="/dashboard/admin/users" element={<AdminRoute><ManageUsers /></AdminRoute>} />
 

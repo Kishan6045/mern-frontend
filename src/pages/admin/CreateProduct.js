@@ -16,6 +16,9 @@ export default function CreateProduct() {
   const [subList, setSubList] = useState([]);
   const [subCategory, setSubCategory] = useState("");
 
+  const [gender, setGender] = useState("");      // ⭐ NEW
+  const [type, setType] = useState("");          // ⭐ NEW
+
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
@@ -42,7 +45,6 @@ export default function CreateProduct() {
   // Category Change Handler
   const handleCategoryChange = (value) => {
     setCategory(value);
-
     const selectedCat = categories.find((c) => c._id === value);
     setSubList(selectedCat?.subcategories || []);
     setSubCategory("");
@@ -62,6 +64,8 @@ export default function CreateProduct() {
       productData.append("quantity", quantity);
       productData.append("shipping", shipping);
       productData.append("category", category);
+      productData.append("gender", gender);       // ⭐ NEW
+      productData.append("type", type);           // ⭐ NEW
       productData.append("photo", photo);
 
       if (subCategory) {
@@ -86,6 +90,8 @@ export default function CreateProduct() {
         setCategory("");
         setSubList([]);
         setSubCategory("");
+        setGender("");
+        setType("");
         setPhoto("");
       } else {
         toast.error(data.message);
@@ -146,6 +152,36 @@ export default function CreateProduct() {
               </Select>
             </>
           )}
+
+          {/* GENDER (NEW) */}
+          <div className="mb-4">
+            <label className="text-yellow-500 font-semibold">Gender</label>
+            <select
+              value={gender}
+              onChange={(e) => setGender(e.target.value)}
+              className="w-full bg-[#222] p-2 text-white rounded"
+              required
+            >
+              <option value="">Select Gender</option>
+              <option value="men">Men</option>
+              <option value="women">Women</option>
+            </select>
+          </div>
+
+          {/* TYPE (NEW) */}
+          <div className="mb-4">
+            <label className="text-yellow-500 font-semibold">Watch Type</label>
+            <select
+              value={type}
+              onChange={(e) => setType(e.target.value)}
+              className="w-full bg-[#222] p-2 text-white rounded"
+              required
+            >
+              <option value="">Select Type</option>
+              <option value="classic">Classic</option>
+              <option value="smart">Smart</option>
+            </select>
+          </div>
 
           {/* PHOTO UPLOAD */}
           <label className="text-gray-300 text-sm">Upload Photo</label>

@@ -1,8 +1,40 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import Layout from "../components/Layout/Layout";
+import axios from "axios";
+import { API } from "../config";
 
 export default function HomePage() {
+  const navigate = useNavigate();
+
+  const [trending, setTrending] = useState([]);
+  const [newArrivals, setNewArrivals] = useState([]);
+
+  // LOAD TRENDING PRODUCTS
+  const loadTrending = async () => {
+    try {
+      const { data } = await axios.get(`${API}/api/v1/product/trending`);
+      if (data.success) setTrending(data.products);
+    } catch (err) {
+      console.log("Trending Error", err);
+    }
+  };
+
+  // LOAD NEW ARRIVALS
+  const loadNewArrivals = async () => {
+    try {
+      const { data } = await axios.get(`${API}/api/v1/product/get-products`);
+      if (data.success) setNewArrivals(data.products.slice(0, 4));
+    } catch (err) {
+      console.log("New Arrivals Error", err);
+    }
+  };
+
+  useEffect(() => {
+    loadTrending();
+    loadNewArrivals();
+  }, []);
+
   return (
     <Layout>
       <div className="bg-[#0c0c0c] text-white min-h-screen">
@@ -34,138 +66,103 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* ⭐ FEATURED CATEGORIES */}
+        {/* ⭐ SHOP BY CATEGORY */}
         <div className="py-16 px-6 max-w-6xl mx-auto">
           <h2 className="text-3xl font-bold text-yellow-500 text-center mb-10">
-            Featured Collections
+            Shop by Category
           </h2>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
 
-            <Link
-              to="/products?gender=men"
-              className="bg-[#1a1a1a] p-5 rounded-xl hover:border-yellow-500 border border-transparent transition cursor-pointer"
-            >
-              <img
-                src="https://m.media-amazon.com/images/I/712Zc24+5wL._AC_UL480_FMwebp_QL65_.jpg"
-                className="h-40 w-full object-cover rounded-md"
-                alt="Men"
-              />
-              <h3 className="text-lg mt-3 text-center font-semibold">Men’s Watches</h3>
-            </Link>
+            {/* Men's */}
+            <CategoryBox
+              onClick={() => navigate("/products?gender=men")}
+              img="https://m.media-amazon.com/images/I/712Zc24+5wL._AC_UL480_FMwebp_QL65_.jpg"
+              title="Men’s Watches"
+            />
 
-            <Link
-              to="/products?gender=women"
-              className="bg-[#1a1a1a] p-5 rounded-xl hover:border-yellow-500 border border-transparent transition cursor-pointer"
-            >
-              <img
-                src="https://m.media-amazon.com/images/I/71dNQWf9YWL._AC_UL480_FMwebp_QL65_.jpg"
-                className="h-40 w-full object-cover rounded-md"
-                alt="Women"
-              />
-              <h3 className="text-lg mt-3 text-center font-semibold">Women’s Watches</h3>
-            </Link>
+            {/* Women */}
+            <CategoryBox
+              onClick={() => navigate("/products?gender=women")}
+              img="https://m.media-amazon.com/images/I/71dNQWf9YWL._AC_UL480_FMwebp_QL65_.jpg"
+              title="Women’s Watches"
+            />
 
-            <Link
-              to="/products?type=smart"
-              className="bg-[#1a1a1a] p-5 rounded-xl hover:border-yellow-500 border border-transparent transition cursor-pointer"
-            >
-              <img
-                src="https://m.media-amazon.com/images/I/61X91w7Y3xL._AC_UL480_FMwebp_QL65_.jpg"
-                className="h-40 w-full object-cover rounded-md"
-                alt="Smart"
-              />
-              <h3 className="text-lg mt-3 text-center font-semibold">Smart Watches</h3>
-            </Link>
+            {/* Smart */}
+            <CategoryBox
+              onClick={() => navigate("/products?type=smart")}
+              img="https://m.media-amazon.com/images/I/61X91w7Y3xL._AC_UL480_FMwebp_QL65_.jpg"
+              title="Smart Watches"
+            />
 
-            <Link
-              to="/products?type=classic"
-              className="bg-[#1a1a1a] p-5 rounded-xl hover:border-yellow-500 border border-transparent transition cursor-pointer"
-            >
-              <img
-                src="https://m.media-amazon.com/images/I/71KhLDaXVgL._AC_UL480_FMwebp_QL65_.jpg"
-                className="h-40 w-full object-cover rounded-md"
-                alt="Classic"
-              />
-              <h3 className="text-lg mt-3 text-center font-semibold">Classic Watches</h3>
-            </Link>
-
+            {/* Classic */}
+            <CategoryBox
+              onClick={() => navigate("/products?type=classic")}
+              img="https://m.media-amazon.com/images/I/71KhLDaXVgL._AC_UL480_FMwebp_QL65_.jpg"
+              title="Classic Watches"
+            />
           </div>
         </div>
 
-        {/* ⭐ BEST SELLERS */}
-        <div className="py-16 bg-[#111] px-6">
-          <h2 className="text-3xl font-bold text-yellow-500 text-center mb-10">
-            Best Sellers
-          </h2>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-
-            {[
-              {
-                img: "https://m.media-amazon.com/images/I/71i68ZYB2AL._AC_UL480_FMwebp_QL65_.jpg",
-                name: "Rolex Submariner",
-                price: "₹1,25,000",
-              },
-              {
-                img: "https://m.media-amazon.com/images/I/71jtGXy4V9L._AC_UL480_FMwebp_QL65_.jpg",
-                name: "Omega Seamaster",
-                price: "₹95,000",
-              },
-              {
-                img: "https://m.media-amazon.com/images/I/81tShwXO8OL._AC_UL480_FMwebp_QL65_.jpg",
-                name: "Fossil Chronograph",
-                price: "₹18,999",
-              },
-            ].map((item, i) => (
-              <div
-                key={i}
-                className="bg-[#1a1a1a] p-5 rounded-xl hover:border-yellow-500 border border-transparent transition"
-              >
-                <img
-                  src={item.img}
-                  className="h-52 w-full object-cover rounded-md"
-                  alt=""
-                />
-                <h3 className="text-xl mt-4 font-semibold">{item.name}</h3>
-                <p className="text-yellow-500 mt-1">{item.price}</p>
-                <Link
-                  to="/products"
-                  className="block mt-4 bg-yellow-500 text-black p-2 text-center rounded-md font-bold hover:bg-yellow-600 transition"
-                >
-                  Buy Now
-                </Link>
-              </div>
-            ))}
-
-          </div>
-        </div>
+        {/* ⭐ TRENDING PRODUCTS */}
+        <Section title="🔥 Trending Watches (Most Sold)">
+          <ProductGrid products={trending} />
+        </Section>
 
         {/* ⭐ NEW ARRIVALS */}
-        <div className="py-16 px-6 max-w-6xl mx-auto">
-          <h2 className="text-3xl font-bold text-yellow-500 text-center mb-10">
-            New Arrivals
-          </h2>
-
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            {[1, 2, 3, 4].map((n) => (
-              <div
-                key={n}
-                className="bg-[#1a1a1a] p-5 rounded-xl hover:border-yellow-500 border border-transparent transition"
-              >
-                <img
-                  src="https://m.media-amazon.com/images/I/71KhLDaXVgL._AC_UL480_FMwebp_QL65_.jpg"
-                  className="h-40 w-full object-cover rounded-md"
-                  alt=""
-                />
-                <h3 className="mt-3 text-lg font-semibold">Premium Watch</h3>
-                <p className="text-yellow-500">₹49,999</p>
-              </div>
-            ))}
-          </div>
-        </div>
-
+        <Section title="🌟 New Arrivals">
+          <ProductGrid products={newArrivals} small />
+        </Section>
       </div>
     </Layout>
+  );
+}
+
+/* ---------------- COMPONENTS ---------------- */
+
+function CategoryBox({ onClick, img, title }) {
+  return (
+    <div
+      onClick={onClick}
+      className="cursor-pointer bg-[#1a1a1a] p-5 rounded-xl hover:border-yellow-500 border border-transparent transition"
+    >
+      <img src={img} className="h-40 w-full object-cover rounded-md" alt="" />
+      <h3 className="text-lg mt-3 text-center font-semibold">{title}</h3>
+    </div>
+  );
+}
+
+function Section({ title, children }) {
+  return (
+    <div className="py-16 px-6 max-w-6xl mx-auto">
+      <h2 className="text-3xl font-bold text-yellow-500 text-center mb-10">
+        {title}
+      </h2>
+      {children}
+    </div>
+  );
+}
+
+function ProductGrid({ products, small }) {
+  return (
+    <div
+      className={`grid grid-cols-1 ${small ? "md:grid-cols-4" : "md:grid-cols-3"} gap-8`}
+    >
+      {products.map((p) => (
+        <div
+          key={p._id}
+          className="bg-[#1a1a1a] p-5 rounded-xl hover:border-yellow-500 border border-transparent transition"
+        >
+          <img
+            src={`${API}/api/v1/product/product-photo/${p._id}`}
+            className={`${small ? "h-40" : "h-52"} w-full object-cover rounded-md`}
+            alt={p.name}
+          />
+
+          <h3 className="text-xl mt-4 font-semibold">{p.name}</h3>
+          <p className="text-yellow-500 mt-1">₹{p.price}</p>
+        </div>
+      ))}
+    </div>
   );
 }
