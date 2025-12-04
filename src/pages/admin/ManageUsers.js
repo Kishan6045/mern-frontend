@@ -3,9 +3,13 @@ import axios from "axios";
 import { API } from "../../config";
 import AdminMenu from "../../components/Layout/AdminMenu";
 import { useAuth } from "../../context/auth";
+import { useNavigate } from "react-router-dom";
+
 
 export default function ManageUsers() {
   const [auth] = useAuth();
+    const navigate = useNavigate();   // ✅ ADD THIS
+
 
   const [users, setUsers] = useState([]);
 
@@ -40,14 +44,14 @@ export default function ManageUsers() {
       search.trim() === ""
         ? true
         : u.name.toLowerCase().includes(search.toLowerCase()) ||
-          u.email.toLowerCase().includes(search.toLowerCase())
+        u.email.toLowerCase().includes(search.toLowerCase())
     )
     .filter((u) =>
       roleFilter === "all"
         ? true
         : roleFilter === "admin"
-        ? u.role === 1
-        : u.role === 0
+          ? u.role === 1
+          : u.role === 0
     );
 
   // SORT
@@ -141,9 +145,8 @@ export default function ManageUsers() {
 
                   <td className="p-3 border-b border-gray-700">
                     <span
-                      className={`px-2 py-1 rounded text-sm ${
-                        u.role === 1 ? "bg-green-600" : "bg-blue-600"
-                      }`}
+                      className={`px-2 py-1 rounded text-sm ${u.role === 1 ? "bg-green-600" : "bg-blue-600"
+                        }`}
                     >
                       {u.role === 1 ? "Admin" : "User"}
                     </span>
@@ -152,9 +155,13 @@ export default function ManageUsers() {
                   <td className="p-3 border-b border-gray-700">Active</td>
 
                   <td className="p-3 border-b border-gray-700">
-                    <button className="bg-gray-700 px-3 py-1 rounded mr-2">
+                    <button
+                      className="bg-gray-700 px-3 py-1 rounded mr-2"
+                      onClick={() => navigate(`/dashboard/admin/user/${u._id}`)}
+                    >
                       View
                     </button>
+
                     <button className="bg-gray-700 px-3 py-1 rounded mr-2">
                       Edit
                     </button>

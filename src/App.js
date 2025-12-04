@@ -26,6 +26,8 @@ import AdminProducts from "./pages/admin/AdminProducts";
 import AdminOrders from "./pages/admin/AdminOrders";
 import AdminAnalytics from "./pages/admin/AdminAnalytics";
 import EditProduct from "./pages/admin/EditProduct";
+import ViewUser from "./pages/admin/ViewUser";
+
 
 
 
@@ -60,6 +62,8 @@ function App() {
           <Route path="/dashboard/admin/create-product" element={<AdminRoute><CreateProduct /></AdminRoute>} />
           <Route path="/dashboard/admin/products" element={<AdminRoute><AdminProducts /></AdminRoute>} />
           <Route path="/dashboard/admin/products/:slug" element={<EditProduct />} />
+          <Route path="/dashboard/admin/user/:id" element={<ViewUser />} />
+
 
           <Route
   path="/dashboard/admin/analytics"

@@ -1,6 +1,89 @@
+/* @tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+ */
+
+
+
+
+
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* RESET */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply bg-dark text-white font-pop;
+}
+
+/* GLOBAL LAYOUT */
+.container-main {
+  @apply px-4 xs:px-5 md:px-6 max-w-7xl mx-auto;
+  /* mobile padding fixed */
+}
+
+/* PAGE SPACING */
+.page {
+  @apply pt-20 pb-safe min-h-screen;
+}
+
+/* HEADINGS */
+.page-title {
+  @apply text-2xl xs:text-3xl md:text-4xl font-bold text-primary mb-6 text-center;
+}
+
+.section-title {
+  @apply text-xl xs:text-2xl font-semibold text-primary mb-4;
+}
+
+/* BUTTONS */
+.btn-primary {
+  @apply bg-primary text-black font-semibold 
+         px-4 py-2 xs:px-5 xs:py-3
+         rounded-lg w-full xs:w-auto
+         shadow-soft hover:bg-yellow-400 transition;
+}
+
+.btn-dark {
+  @apply bg-dark2 text-white px-4 py-2 rounded-lg
+         border border-border w-full xs:w-auto
+         hover:bg-dark transition;
+}
+
+/* INPUTS */
+.input {
+  @apply w-full bg-dark2 text-white p-3 rounded-lg 
+         border border-border focus:border-primary outline-none;
+}
+
+/* CARDS */
+.card {
+  @apply bg-card p-4 xs:p-5 rounded-xl
+         shadow-card hover:shadow-soft transition
+         w-full;
+}
+
+/* IMAGES */
+.resp-img {
+  @apply w-full h-40 xs:h-52 md:h-64 object-cover rounded-lg;
+}
+
+/* GRID SYSTEM */
+.grid-auto {
+  @apply grid grid-cols-1 xs:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6;
+}
+
+
 
 
 
