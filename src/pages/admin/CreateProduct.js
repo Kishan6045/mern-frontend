@@ -5,6 +5,7 @@ import { API } from "../../config";
 import AdminMenu from "../../components/Layout/AdminMenu";
 import { useAuth } from "../../context/auth";
 import { Select } from "antd";
+
 const { Option } = Select;
 
 export default function CreateProduct() {
@@ -26,7 +27,9 @@ export default function CreateProduct() {
   const getAllCategories = async () => {
     try {
       const { data } = await axios.get(`${API}/api/v1/category/get-category`);
-      if (data?.success) setCategories(data?.category || []);
+      if (data.success) {
+        setCategories(data.category);
+      }
     } catch (error) {
       toast.error("Error loading categories");
     }
@@ -36,7 +39,16 @@ export default function CreateProduct() {
     getAllCategories();
   }, []);
 
-  // Product Create Handler
+  // Category Change Handler
+  const handleCategoryChange = (value) => {
+    setCategory(value);
+
+    const selectedCat = categories.find((c) => c._id === value);
+    setSubList(selectedCat?.subcategories || []);
+    setSubCategory("");
+  };
+
+  // Create Product Handler
   const handleCreate = async (e) => {
     e.preventDefault();
 
@@ -59,13 +71,13 @@ export default function CreateProduct() {
       const { data } = await axios.post(
         `${API}/api/v1/product/create-product`,
         productData,
-        {
-          headers: { Authorization: `Bearer ${auth?.token}` },
-        }
+        { headers: { Authorization: auth?.token } }
       );
 
-      if (data?.success) {
-        toast.success("Product Created Successfully");
+      if (data.success) {
+        toast.success("Product Created Successfully!");
+
+        // Reset form
         setName("");
         setDescription("");
         setPrice("");
@@ -81,14 +93,6 @@ export default function CreateProduct() {
     } catch (error) {
       toast.error("Something went wrong");
     }
-  };
-
-  // Category Change Handler
-  const handleCategoryChange = (value) => {
-    setCategory(value);
-    const selectedCat = categories.find((c) => c._id === value);
-    setSubList(selectedCat?.subcategories || []);
-    setSubCategory("");
   };
 
   return (
@@ -114,8 +118,8 @@ export default function CreateProduct() {
             value={category || undefined}
             onChange={handleCategoryChange}
           >
-            {categories?.map((c) => (
-              <Option key={c._id} value={c._id} style={{ background: "#222", color: "white" }}>
+            {categories.map((c) => (
+              <Option key={c._id} value={c._id}>
                 {c.name}
               </Option>
             ))}
@@ -132,10 +136,10 @@ export default function CreateProduct() {
                 className="w-full mb-4 bg-[#222] text-white"
                 dropdownStyle={{ backgroundColor: "#222", color: "white" }}
                 value={subCategory || undefined}
-                onChange={(value) => setSubCategory(value)}
+                onChange={(val) => setSubCategory(val)}
               >
                 {subList.map((sub) => (
-                  <Option key={sub.slug} value={sub.slug} style={{ background: "#222", color: "white" }}>
+                  <Option key={sub.slug} value={sub.slug}>
                     {sub.name}
                   </Option>
                 ))}
@@ -204,14 +208,10 @@ export default function CreateProduct() {
               className="w-full mb-6 bg-[#222] text-white"
               dropdownStyle={{ backgroundColor: "#222", color: "white" }}
               value={shipping || undefined}
-              onChange={(value) => setShipping(value)}
+              onChange={(val) => setShipping(val)}
             >
-              <Option value="1" style={{ background: "#222", color: "white" }}>
-                Yes
-              </Option>
-              <Option value="0" style={{ background: "#222", color: "white" }}>
-                No
-              </Option>
+              <Option value="1">Yes</Option>
+              <Option value="0">No</Option>
             </Select>
 
             <button

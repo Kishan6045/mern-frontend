@@ -220,6 +220,7 @@ import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { FiX, FiChevronDown, FiLogOut } from "react-icons/fi";
 import { useAuth } from "../../context/auth";
+import { API } from "../../config"; 
 
 function DrawerMenu({ open, setOpen }) {
   const navigate = useNavigate();
@@ -232,12 +233,10 @@ function DrawerMenu({ open, setOpen }) {
     loadCategories();
   }, []);
 
-  const loadCategories = async () => {
-    const { data } = await axios.get(
-      "http://localhost:8080/api/v1/category/get-category"
-    );
-    setCategories(data.category || []);
-  };
+ const loadCategories = async () => {
+  const { data } = await axios.get(`${API}/api/v1/category/get-category`);  // ✅ FIXED
+  setCategories(data.category || []);
+};
 
   const toggleSub = (index) => {
     setCategories((prev) =>

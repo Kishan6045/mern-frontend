@@ -1,44 +1,38 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { useLocation } from "react-router-dom";
 import { API } from "../config";
 import Layout from "../components/Layout/Layout";
+import { useCart } from "../context/cart";
+import { useNavigate } from "react-router-dom";
 
 export default function Products() {
-  const { search } = useLocation();
-  const query = new URLSearchParams(search);
-
-  const category = query.get("category");
-  const sub = query.get("sub");
-
   const [products, setProducts] = useState([]);
+  const [cart, setCart] = useCart();
+  const navigate = useNavigate();
 
   useEffect(() => {
     loadProducts();
-  }, [category, sub]);
+  }, []);
 
   const loadProducts = async () => {
     try {
-      let url = `${API}/api/v1/product/get-products`;
-
-      if (category || sub) {
-        url = `${API}/api/v1/product/filter-products?`;
-
-        if (category) url += `category=${category}&`;
-        if (sub) url += `sub=${sub}`;
-      }
-
-      const { data } = await axios.get(url);
+      const { data } = await axios.get(`${API}/api/v1/product/get-products`);
       setProducts(data.products || []);
     } catch (err) {
       console.log("Error loading products");
     }
   };
 
+  const addToCart = (p) => {
+    const updatedCart = [...cart, p];
+    setCart(updatedCart);
+    localStorage.setItem("cart", JSON.stringify(updatedCart));
+  };
+
   return (
     <Layout>
       <div className="p-6">
-        <h1 className="text-2xl font-bold text-yellow-500 mb-6">Products</h1>
+        <h1 className="text-2xl font-bold text-yellow-500 mb-6">Watches</h1>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
           {products.map((p) => (
@@ -52,8 +46,33 @@ export default function Products() {
                 alt={p.name}
               />
 
-              <h3 className="text-white text-lg">{p.name}</h3>
-              <p className="text-yellow-500 font-bold">₹{p.price}</p>
+              <h3 className="text-white text-lg font-semibold">{p.name}</h3>
+              <p className="text-yellow-500 font-bold mb-3">₹{p.price}</p>
+
+              {/* Buttons */}
+              <div className="flex flex-col space-y-3">
+
+                {/* Add to Cart */}
+                <button
+                  onClick={() => addToCart(p)}
+                  className="w-full bg-yellow-500 text-black font-bold py-2 rounded-lg hover:bg-yellow-600 transition"
+                >
+                  Add to Cart 🛒
+                </button>
+
+                {/* Buy Now */}
+                <button
+                  onClick={() => {
+                    localStorage.setItem("checkoutProduct", JSON.stringify(p));
+                    navigate("/checkout");
+                  }}
+                  className="w-full bg-[#333] text-white border border-yellow-500 py-2 rounded-lg hover:bg-[#444] transition"
+                >
+                  Buy Now ⚡
+                </button>
+
+
+              </div>
             </div>
           ))}
         </div>
