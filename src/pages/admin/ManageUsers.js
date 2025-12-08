@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { API } from "../../config";
-import AdminMenu from "../../components/Layout/AdminMenu";
 import { useAuth } from "../../context/auth";
 import { useNavigate } from "react-router-dom";
+import AdminLayout from "../../components/Layout/AdminLayout";
 
 
 export default function ManageUsers() {
@@ -67,14 +67,7 @@ export default function ManageUsers() {
   const currentUsers = sortedUsers.slice(startIdx, startIdx + usersPerPage);
 
   return (
-    <div className="flex min-h-screen bg-white text-white">
-
-      {/* LEFT SIDEBAR */}
-      <AdminMenu />
-
-      {/* RIGHT CONTENT */}
-      <div className="flex-1 p-18 pt-14 px-9 pt-25">
-
+   <AdminLayout>
         <h1 className="text-3xl font-bold text-yellow-500 text-center mb-6">
           Manage Users
         </h1>
@@ -199,7 +192,6 @@ export default function ManageUsers() {
           </button>
         </div>
 
-      </div>
-    </div>
+     </AdminLayout>
   );
 }

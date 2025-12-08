@@ -5,6 +5,7 @@ import axios from "axios";
 import { API } from "../../config";
 import { useAuth } from "../../context/auth";
 import AdminMenu from "../../components/Layout/AdminMenu";
+import AdminLayout from "../../components/Layout/AdminLayout";
 
 export default function AdminDashboard() {
   const [auth] = useAuth();
@@ -36,8 +37,8 @@ export default function AdminDashboard() {
   }, [auth?.token]);
 
   return (
-    <div className="flex min-h-screen bg-black text-white">
-      <AdminMenu />
+    <AdminLayout>
+    <div className=" min-h-screen bg-black text-white">
       <div className="flex-1 p-8 pt-20">
         <h1 className="text-3xl text-yellow-500 font-bold mb-6 text-center">
           Admin Dashboard
@@ -67,5 +68,6 @@ export default function AdminDashboard() {
         </div>
       </div>
     </div>
+    </AdminLayout>
   );
 }

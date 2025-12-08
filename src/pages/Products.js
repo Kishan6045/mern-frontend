@@ -97,23 +97,30 @@ export default function Products() {
      ADD TO CART
   =============================== */
   const addToCart = (p) => {
-    const existing = cart.find((item) => item._id === p._id);
-
-    let updatedCart;
-    if (existing) {
-      updatedCart = cart.map((item) =>
-        item._id === p._id
-          ? { ...item, qty: (item.qty || 1) + 1 }
-          : item
-      );
-    } else {
-      updatedCart = [...cart, { ...p, qty: 1 }];
-    }
-
-    setCart(updatedCart);
-    localStorage.setItem("cart", JSON.stringify(updatedCart));
-    toast.success("Added to cart");
+  const productToAdd = {
+    _id: p._id,
+    name: p.name,
+    price: p.price,
+    qty: 1
   };
+
+  const existing = cart.find((item) => item._id === p._id);
+
+  let updatedCart;
+
+  if (existing) {
+    updatedCart = cart.map((item) =>
+      item._id === p._id ? { ...item, qty: item.qty + 1 } : item
+    );
+  } else {
+    updatedCart = [...cart, productToAdd];
+  }
+
+  setCart(updatedCart);
+  localStorage.setItem("cart", JSON.stringify(updatedCart));
+
+  toast.success("Added to cart");
+};
 
   /* ===============================
      BUY NOW

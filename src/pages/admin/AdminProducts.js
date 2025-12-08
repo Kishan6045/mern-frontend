@@ -4,9 +4,10 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { API } from "../../config";
-import AdminMenu from "../../components/Layout/AdminMenu";
 import { useAuth } from "../../context/auth";
 import { useNavigate } from "react-router-dom";
+import AdminLayout from "../../components/Layout/AdminLayout";
+
 
 // Icons
 import { FiTrash2, FiSearch, FiFilter, FiEdit2 } from "react-icons/fi";
@@ -92,10 +93,8 @@ export default function AdminProducts() {
     );
 
   return (
-    <div className="flex min-h-screen bg-black text-white">
-      <AdminMenu />
-
-      <div className="flex-1 p-6 pt-20 bg-black">
+    <AdminLayout>
+      <div className="pt-4"> 
         <h1 className="text-3xl font-bold text-yellow-500 text-center mb-6">
           Manage Products
         </h1>
@@ -203,7 +202,7 @@ export default function AdminProducts() {
             </table>
           )}
         </div>
-      </div>
-    </div>
+        </div>
+     </AdminLayout>
   );
 }

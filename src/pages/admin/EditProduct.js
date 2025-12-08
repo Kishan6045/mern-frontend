@@ -6,7 +6,7 @@ import toast from "react-hot-toast";
 import { useParams, useNavigate } from "react-router-dom";
 import { API } from "../../config";
 import { useAuth } from "../../context/auth";
-import AdminMenu from "../../components/Layout/AdminMenu";
+import AdminLayout from "../../components/Layout/AdminLayout";
 
 export default function EditProduct() {
   const { slug } = useParams();
@@ -109,10 +109,7 @@ export default function EditProduct() {
   };
 
   return (
-    <div className="flex min-h-screen bg-black text-white">
-      <AdminMenu />
-
-      <div className="flex-1 pt-20 p-6">
+   <AdminLayout>
         <h1 className="text-3xl font-bold text-yellow-500 mb-6 text-center">
           Edit Product
         </h1>
@@ -238,7 +235,6 @@ export default function EditProduct() {
             Update Product ✅
           </button>
         </form>
-      </div>
-    </div>
+    </AdminLayout>
   );
 }

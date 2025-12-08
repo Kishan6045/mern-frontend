@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { API } from "../../config";
 import { useAuth } from "../../context/auth";
-import AdminMenu from "../../components/Layout/AdminMenu";
+import AdminLayout from "../../components/Layout/AdminLayout";
 
 const STATUS_OPTIONS = [
   "Pending",
@@ -154,12 +154,7 @@ export default function AdminOrders() {
   };
 
   return (
-    <div className="flex min-h-screen bg-black text-white">
-      {/* LEFT SIDEBAR */}
-      <AdminMenu />
-
-      {/* RIGHT CONTENT */}
-      <div className="flex-1 p-8 pt-20">
+    <AdminLayout>
         <h1 className="text-3xl text-yellow-500 font-bold mb-6 text-center">
           Manage Orders
         </h1>
@@ -365,7 +360,6 @@ export default function AdminOrders() {
             </div>
           ))}
         </div>
-      </div>
-    </div>
+     </AdminLayout>
   );
 }

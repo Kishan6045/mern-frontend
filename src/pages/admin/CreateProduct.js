@@ -2,9 +2,9 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { API } from "../../config";
-import AdminMenu from "../../components/Layout/AdminMenu";
 import { useAuth } from "../../context/auth";
 import { Select } from "antd";
+import AdminLayout from "../../components/Layout/AdminLayout";
 
 const { Option } = Select;
 
@@ -102,10 +102,7 @@ export default function CreateProduct() {
   };
 
   return (
-    <div className="flex min-h-screen bg-[#ffffff] text-white">
-      <AdminMenu />
-
-      <div className="flex-1 p-10 pt-20">
+    <AdminLayout>
         <h1 className="text-3xl font-bold text-yellow-500 text-center mb-8">
           Create Product
         </h1>
@@ -259,7 +256,6 @@ export default function CreateProduct() {
           </form>
 
         </div>
-      </div>
-    </div>
+      </AdminLayout>
   );
 }

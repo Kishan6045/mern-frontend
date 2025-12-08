@@ -2,8 +2,8 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { API } from "../../config";
-import AdminMenu from "../../components/Layout/AdminMenu";
 import { useAuth } from "../../context/auth";
+import AdminLayout from "../../components/Layout/AdminLayout";
 
 export default function CreateCategory() {
   const [name, setName] = useState("");
@@ -90,14 +90,7 @@ export default function CreateCategory() {
   };
 
   return (
-    <div className="flex min-h-screen bg-white text-white">
-
-      {/* LEFT SIDEBAR */}
-      <AdminMenu />
-
-      {/* RIGHT CONTENT */}
-      <div className="flex-1 p-18 pt-14 px-9 pt-25">
-
+   <AdminLayout>
         <h2 className="text-3xl font-bold text-yellow-500 text-center mb-6">
           Manage Categories
         </h2>
@@ -185,7 +178,6 @@ export default function CreateCategory() {
           ))}
         </div>
 
-      </div>
-    </div>
+      </AdminLayout>
   );
 }
