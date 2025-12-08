@@ -65,7 +65,7 @@ export default function UserOrders() {
 
   return (
     <Layout>
-      <div className="p-6 pt-20 min-h-screen bg-black text-white">
+      <div className="p-6 pt-24 min-h-screen bg-black text-white">
         <h1 className="text-3xl font-bold text-yellow-500 mb-6 flex items-center gap-2">
           <FaBox /> My Orders
         </h1>

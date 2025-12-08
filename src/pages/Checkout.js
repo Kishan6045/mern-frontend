@@ -11,7 +11,6 @@ export default function Checkout() {
   const [products, setProducts] = useState([]);
   const [address, setAddress] = useState("");
   const [payment, setPayment] = useState("");
-  const [giftMessage, setGiftMessage] = useState("");
   const navigate = useNavigate();
   const [auth] = useAuth();
   const [cart, setCart] = useCart();
@@ -21,6 +20,9 @@ export default function Checkout() {
   const [finalAmount, setFinalAmount] = useState(0);
 
   const [savedAddresses, setSavedAddresses] = useState([]);
+
+
+  
 
   // Load Data
   useEffect(() => {
@@ -64,6 +66,14 @@ export default function Checkout() {
 
   // 🔥 MAIN RAZORPAY PAYMENT FUNCTION (ONLY ONE)
   const payWithRazorpay = async () => {
+
+
+     // 🛑 LOGIN CHECK (MOST IMPORTANT)
+  if (!auth?.token) {
+    toast.error("Please login first");
+    return navigate("/login");
+  }
+
     if (!address) return toast.error("Enter address");
 
     const scriptLoaded = await loadRazorpayScript();
@@ -105,23 +115,36 @@ export default function Checkout() {
   };
 
   // Coupon Apply
-  const applyCoupon = async () => {
-    if (!couponCode) return toast.error("Enter coupon");
-    try {
-      const { data } = await axios.post(`${API}/api/v1/coupon/apply`, {
+ const applyCoupon = async () => {
+  if (!couponCode) return toast.error("Enter coupon");
+
+  try {
+    const { data } = await axios.post(
+      `${API}/api/v1/coupon/apply`,
+      {
         code: couponCode,
         amount: totalAmount,
-      });
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${auth?.token}`,
+        },
+      }
+    );
 
-      if (data.success) {
-        setDiscount(data.discount);
-        setFinalAmount(data.finalAmount);
-        toast.success("Coupon Applied!");
-      } else toast.error(data.message);
-    } catch {
-      toast.error("Coupon error");
+    if (data.success) {
+      setDiscount(data.discount);
+      setFinalAmount(data.finalAmount);
+      toast.success("Coupon Applied!");
+    } else {
+      toast.error(data.message);
     }
-  };
+  } catch (e) {
+    console.log(e);
+    toast.error("Coupon error");
+  }
+};
+
 
   // Save Address
   const saveCurrentAddress = () => {
@@ -133,34 +156,40 @@ export default function Checkout() {
   };
 
   // Save Order in DB
-  const handleOrder = async (paidMethod = "cod") => {
-    const finalData = {
-      products: products.map((p) => p._id),
-      payment: {
-        method: paidMethod,
-        status: paidMethod === "cod" ? "pending" : "paid",
-      },
-      itemsTotal: totalAmount,
-      deliveryCharge,
-      discount,
-      amount: totalPayable,
-      address,
-      giftMessage,
-    };
+ const handleOrder = async (paidMethod = "cod") => {
 
-    const res = await axios.post(`${API}/api/v1/order/create-order`, finalData, {
-      headers: { Authorization: `Bearer ${auth?.token}` },
-    });
+  if (!auth?.token) {
+    toast.error("Login required to place order");
+    return navigate("/login");
+  }
 
-    if (res.data.success) {
-      localStorage.removeItem("checkoutProduct");
-      localStorage.removeItem("checkoutCart");
-      localStorage.removeItem("cart");
-
-      setCart([]);
-      navigate("/order-success");
-    }
+  const finalData = {
+    products: products.map((p) => p._id),
+    payment: {
+      method: paidMethod,
+      status: paidMethod === "cod" ? "pending" : "paid",
+    },
+    itemsTotal: totalAmount,
+    deliveryCharge,
+    discount,
+    amount: totalPayable,
+    address,
   };
+
+  const res = await axios.post(`${API}/api/v1/order/create-order`, finalData, {
+    headers: { Authorization: `Bearer ${auth?.token}` },
+  });
+
+  if (res.data.success) {
+    localStorage.removeItem("checkoutProduct");
+    localStorage.removeItem("checkoutCart");
+    localStorage.removeItem("cart");
+
+    setCart([]);
+    navigate("/order-success");
+  }
+};
+
 
   // Final Button Handler
   const submitOrder = () => {
@@ -256,15 +285,7 @@ export default function Checkout() {
                 Save Address
               </button>
 
-              {/* Gift Message */}
-              <h2 className="text-xl font-semibold mt-6 mb-2">Gift Message</h2>
-              <textarea
-                className="w-full bg-[#222] p-3 rounded-md"
-                rows={2}
-                placeholder="Write a message..."
-                value={giftMessage}
-                onChange={(e) => setGiftMessage(e.target.value)}
-              ></textarea>
+          
             </div>
 
             {/* PAYMENT */}

@@ -27,6 +27,8 @@ import AdminOrders from "./pages/admin/AdminOrders";
 import AdminAnalytics from "./pages/admin/AdminAnalytics";
 import EditProduct from "./pages/admin/EditProduct";
 import ViewUser from "./pages/admin/ViewUser";
+import ScrollToTop from "./components/ScrollToTop";  
+
 
 
 
@@ -37,6 +39,8 @@ function App() {
   return (
     <CartProvider>
       <BrowserRouter>
+
+      <ScrollToTop />
         <Toaster />
 
         <Routes>
@@ -65,10 +69,8 @@ function App() {
           <Route path="/dashboard/admin/user/:id" element={<ViewUser />} />
 
 
-          <Route
-  path="/dashboard/admin/analytics"
-  element={
-    <AdminRoute>
+          <Route path="/dashboard/admin/analytics" element={
+<AdminRoute>
       <AdminAnalytics />
     </AdminRoute>
   }

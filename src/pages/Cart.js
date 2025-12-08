@@ -49,7 +49,7 @@ export default function Cart() {
 
     return (
         <Layout>
-            <div className="p-6 pt-16 min-h-screen bg-black text-white">
+            <div className="p-6 pt-24 min-h-screen bg-black text-white">
                 <h1 className="text-3xl font-bold text-yellow-500 mb-6 flex items-center gap-2">
                     <FaShoppingCart className="text-yellow-500" /> Your Cart
                 </h1>

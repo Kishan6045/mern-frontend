@@ -1,15 +1,31 @@
- @tailwind base;
+@tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* Remove Scrollbar Globally */
+::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
 
- 
+* {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
 
 
+/* ⭐ Smooth Sliding Offer Text */
+@keyframes slideOffer {
+  0% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
 
-
-
-
-
-
+.animate-slide {
+  animation: slideOffer 18s linear infinite;
+  display: inline-block;
+}
 
