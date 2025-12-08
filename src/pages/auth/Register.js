@@ -15,8 +15,16 @@ const Register = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [age, setAge] = useState("");
 
+  // --------------------------
+  // SUBMIT HANDLER
+  // --------------------------
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!email.endsWith("@gmail.com")) {
+      toast.error("Please enter Gmail address only");
+      return;
+    }
 
     const ageNum = Number(age);
     if (!age || isNaN(ageNum) || ageNum < 1) {
@@ -39,9 +47,7 @@ const Register = () => {
           age: ageNum,
         },
         {
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
         }
       );
 
@@ -67,6 +73,7 @@ const Register = () => {
           </h1>
 
           <form onSubmit={handleSubmit}>
+            {/* NAME */}
             <label className="text-gray-300 text-sm">Full Name</label>
             <div className="relative mt-1 mb-4">
               <FiUser className="absolute left-3 top-3 text-gray-400" />
@@ -79,18 +86,38 @@ const Register = () => {
               />
             </div>
 
-            <label className="text-gray-300 text-sm">Email</label>
-            <div className="relative mt-1 mb-4">
+            {/* EMAIL */}
+            <label className="text-gray-300 text-sm">Email (Gmail Only)</label>
+            <div className="relative mt-1 mb-1">
               <FiMail className="absolute left-3 top-3 text-gray-400" />
+
               <input
                 type="email"
                 required
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) => {
+                  let val = e.target.value;
+
+                  // User ने अगर @ डाला → auto gmail लगा दो
+                  if (val.includes("@")) {
+                    const left = val.split("@")[0];
+                    val = left + "@gmail.com";
+                  }
+
+                  setEmail(val);
+                }}
                 className="w-full bg-[#111] text-white pl-10 p-3 rounded-md"
               />
             </div>
 
+            {/* EMAIL WARNING */}
+            {!email.endsWith("@gmail.com") && email.length > 0 && (
+              <p className="text-red-500 text-sm mb-3">
+                Enter only Gmail address
+              </p>
+            )}
+
+            {/* PASSWORD */}
             <label className="text-gray-300 text-sm">Password</label>
             <div className="relative mt-1 mb-4">
               <FiLock className="absolute left-3 top-3 text-gray-400" />
@@ -103,6 +130,7 @@ const Register = () => {
               />
             </div>
 
+            {/* CONFIRM PASSWORD */}
             <label className="text-gray-300 text-sm">Confirm Password</label>
             <div className="relative mt-1 mb-4">
               <FiLock className="absolute left-3 top-3 text-gray-400" />
@@ -115,6 +143,7 @@ const Register = () => {
               />
             </div>
 
+            {/* AGE */}
             <label className="text-gray-300 text-sm">Age</label>
             <div className="relative mt-1 mb-4">
               <FiUser className="absolute left-3 top-3 text-gray-400" />
@@ -127,6 +156,7 @@ const Register = () => {
               />
             </div>
 
+            {/* BUTTON */}
             <button
               type="submit"
               className="w-full bg-[#d4a056] text-black p-3 rounded-md"
@@ -137,7 +167,9 @@ const Register = () => {
 
           <p className="text-gray-400 text-center mt-4">
             Already have an account?{" "}
-            <Link to="/login" className="text-yellow-600">Login</Link>
+            <Link to="/login" className="text-yellow-600">
+              Login
+            </Link>
           </p>
 
         </div>
@@ -147,11 +179,3 @@ const Register = () => {
 };
 
 export default Register;
-
-
-
-
-
-
-
-

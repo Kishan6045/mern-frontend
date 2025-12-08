@@ -131,10 +131,6 @@
 
 
 
-
-
-
-
 import { useState, useEffect } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
@@ -167,18 +163,12 @@ const Login = () => {
 
       window.google.accounts.id.renderButton(
         document.getElementById("googleLoginDiv"),
-        {
-          theme: "outline",
-          size: "large",
-          width: "260",
-        }
+        { theme: "outline", size: "large", width: "260" }
       );
     }
   }, []);
 
-  // -------------------------------------------------------------------
-  // ⭐ GOOGLE LOGIN (ONLY IF USER ALREADY REGISTERED)
-  // -------------------------------------------------------------------
+  // GOOGLE LOGIN
   const handleGoogleResponse = async (response) => {
     try {
       const userObj = jwtDecode(response.credential);
@@ -189,34 +179,29 @@ const Login = () => {
         picture: userObj.picture,
       });
 
-      // ❌ NOT REGISTERED EARLIER
       if (!res.data.success) {
         toast.error("Please register first using Email & Password.");
         return;
       }
 
-      // ✔ LOGIN SUCCESS
       toast.success("Google Login Successful!");
 
-      setAuth({
-        user: res.data.user,
-        token: res.data.token,
-      });
-
+      setAuth({ user: res.data.user, token: res.data.token });
       localStorage.setItem("auth", JSON.stringify(res.data));
       navigate("/");
-
     } catch (err) {
-      console.log("GOOGLE LOGIN ERROR:", err);
       toast.error("Google Login Failed!");
     }
   };
 
-  // -------------------------------------------------------------------
-  // ⭐ NORMAL LOGIN
-  // -------------------------------------------------------------------
+  // NORMAL LOGIN
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!email.endsWith("@gmail.com")) {
+      toast.error("Please enter Gmail address only");
+      return;
+    }
 
     try {
       const res = await axios.post(`${API}/api/v1/auth/login`, {
@@ -227,17 +212,13 @@ const Login = () => {
       if (res.data.success) {
         toast.success("Login Successful!");
 
-        setAuth({
-          user: res.data.user,
-          token: res.data.token,
-        });
-
+        setAuth({ user: res.data.user, token: res.data.token });
         localStorage.setItem("auth", JSON.stringify(res.data));
         navigate("/");
       } else {
         toast.error(res.data.message);
       }
-    } catch (err) {
+    } catch {
       toast.error("Something went wrong");
     }
   };
@@ -259,16 +240,34 @@ const Login = () => {
           {/* LOGIN FORM */}
           <form onSubmit={handleSubmit}>
             <label className="text-gray-300 text-sm">Email address</label>
-            <div className="relative mt-1 mb-4">
+            <div className="relative mt-1 mb-1">
               <FiMail className="absolute left-3 top-3 text-gray-400" />
+
               <input
                 type="email"
-                placeholder="your@email.com"
+                placeholder="your@gmail.com"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) => {
+                  let val = e.target.value;
+
+                  // ⭐ AUTO FILL GMAIL AFTER '@'
+                  if (val.includes("@")) {
+                    const left = val.split("@")[0];
+                    val = left + "@gmail.com";
+                  }
+
+                  setEmail(val);
+                }}
                 className="w-full bg-[#111] text-white pl-10 p-3 rounded-md border border-gray-700"
               />
             </div>
+
+            {/* WARNING */}
+            {!email.endsWith("@gmail.com") && email.length > 0 && (
+              <p className="text-red-500 text-sm mb-3">
+                Enter only Gmail address
+              </p>
+            )}
 
             <label className="text-gray-300 text-sm">Password</label>
             <div className="relative mt-1 mb-4">
@@ -282,9 +281,12 @@ const Login = () => {
               />
             </div>
 
-            {/* ⭐ FORGOT PASSWORD LINK ⭐ */}
+            {/* Forgot Password */}
             <div className="flex justify-end text-sm text-gray-400 mb-4">
-              <Link to="/forgot-password" className="text-yellow-600 hover:underline">
+              <Link
+                to="/forgot-password"
+                className="text-yellow-600 hover:underline"
+              >
                 Forgot Password?
               </Link>
             </div>
@@ -297,7 +299,7 @@ const Login = () => {
             </button>
           </form>
 
-          {/* GOOGLE LOGIN */}
+          {/* GOOGLE LOGIN BUTTON */}
           <div className="mt-5 flex justify-center">
             <div id="googleLoginDiv"></div>
           </div>
@@ -308,6 +310,7 @@ const Login = () => {
               Register
             </Link>
           </p>
+
         </div>
       </div>
     </>
