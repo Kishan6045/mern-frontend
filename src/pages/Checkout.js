@@ -21,16 +21,24 @@ export default function Checkout() {
 
   const [savedAddresses, setSavedAddresses] = useState([]);
 
-
-  
-
-  // Load Data
+  /* ---------------------------
+      LOAD CHECKOUT DATA
+  --------------------------- */
   useEffect(() => {
     const single = localStorage.getItem("checkoutProduct");
     const many = localStorage.getItem("checkoutCart");
 
-    if (single) setProducts([JSON.parse(single)]);
-    else if (many) setProducts(JSON.parse(many));
+    if (single) {
+      const prod = JSON.parse(single);
+
+      // ⭐ FIX: always ensure qty exists
+      setProducts([{ ...prod, qty: prod.qty ? prod.qty : 1 }]);
+    } else if (many) {
+      const arr = JSON.parse(many);
+
+      // ⭐ FIX: ensure each cart item has qty
+      setProducts(arr.map((p) => ({ ...p, qty: p.qty ? p.qty : 1 })));
+    }
 
     const saved = localStorage.getItem("savedAddresses");
     if (saved) setSavedAddresses(JSON.parse(saved));
@@ -38,9 +46,11 @@ export default function Checkout() {
     if (auth?.user?.address) setAddress(auth.user.address);
   }, [auth?.user]);
 
-  // Total
+  /* ---------------------------
+      CALCULATE TOTAL AMOUNT
+  --------------------------- */
   const totalAmount = useMemo(
-    () => products.reduce((sum, p) => sum + p.price * (p.qty || 1), 0),
+    () => products.reduce((sum, p) => sum + p.price * p.qty, 0),
     [products]
   );
 
@@ -53,7 +63,9 @@ export default function Checkout() {
 
   const totalPayable = finalAmount + deliveryCharge;
 
-  // Load Razorpay Script
+  /* ---------------------------
+      LOAD RAZORPAY SCRIPT
+  --------------------------- */
   const loadRazorpayScript = () => {
     return new Promise((resolve) => {
       const script = document.createElement("script");
@@ -64,17 +76,16 @@ export default function Checkout() {
     });
   };
 
-  // 🔥 MAIN RAZORPAY PAYMENT FUNCTION (ONLY ONE)
+  /* ---------------------------
+      ONLINE PAYMENT
+  --------------------------- */
   const payWithRazorpay = async () => {
+    if (!auth?.token) {
+      toast.error("Please login first");
+      return navigate("/login");
+    }
 
-
-     // 🛑 LOGIN CHECK (MOST IMPORTANT)
-  if (!auth?.token) {
-    toast.error("Please login first");
-    return navigate("/login");
-  }
-
-    if (!address) return toast.error("Enter address");
+    if (!address.trim()) return toast.error("Enter address");
 
     const scriptLoaded = await loadRazorpayScript();
     if (!scriptLoaded) return toast.error("Razorpay SDK Failed");
@@ -114,84 +125,86 @@ export default function Checkout() {
     razor.open();
   };
 
-  // Coupon Apply
- const applyCoupon = async () => {
-  if (!couponCode) return toast.error("Enter coupon");
+  /* ---------------------------
+      APPLY COUPON
+  --------------------------- */
+  const applyCoupon = async () => {
+    if (!couponCode) return toast.error("Enter coupon");
 
-  try {
-    const { data } = await axios.post(
-      `${API}/api/v1/coupon/apply`,
-      {
-        code: couponCode,
-        amount: totalAmount,
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${auth?.token}`,
+    try {
+      const { data } = await axios.post(
+        `${API}/api/v1/coupon/apply`,
+        {
+          code: couponCode,
+          amount: totalAmount,
         },
+        {
+          headers: {
+            Authorization: `Bearer ${auth?.token}`,
+          },
+        }
+      );
+
+      if (data.success) {
+        setDiscount(data.discount);
+        setFinalAmount(data.finalAmount);
+        toast.success("Coupon Applied!");
+      } else {
+        toast.error(data.message);
       }
-    );
-
-    if (data.success) {
-      setDiscount(data.discount);
-      setFinalAmount(data.finalAmount);
-      toast.success("Coupon Applied!");
-    } else {
-      toast.error(data.message);
+    } catch (e) {
+      toast.error("Coupon error");
     }
-  } catch (e) {
-    console.log(e);
-    toast.error("Coupon error");
-  }
-};
+  };
 
-
-  // Save Address
+  /* ---------------------------
+      SAVE ADDRESS
+  --------------------------- */
   const saveCurrentAddress = () => {
     if (!address.trim()) return toast.error("Enter address");
+
     const updated = Array.from(new Set([address, ...savedAddresses]));
     setSavedAddresses(updated);
     localStorage.setItem("savedAddresses", JSON.stringify(updated));
     toast.success("Address Saved");
   };
 
-  // Save Order in DB
- const handleOrder = async (paidMethod = "cod") => {
+  /* ---------------------------
+      PLACE ORDER
+  --------------------------- */
+  const handleOrder = async (paidMethod = "cod") => {
+    if (!auth?.token) {
+      toast.error("Login required");
+      return navigate("/login");
+    }
 
-  if (!auth?.token) {
-    toast.error("Login required to place order");
-    return navigate("/login");
-  }
+    const finalData = {
+      products: products.map((p) => p._id),
+      payment: {
+        method: paidMethod,
+        status: paidMethod === "cod" ? "pending" : "paid",
+      },
+      itemsTotal: totalAmount,
+      deliveryCharge,
+      discount,
+      amount: totalPayable,
+      address,
+    };
 
-  const finalData = {
-    products: products.map((p) => p._id),
-    payment: {
-      method: paidMethod,
-      status: paidMethod === "cod" ? "pending" : "paid",
-    },
-    itemsTotal: totalAmount,
-    deliveryCharge,
-    discount,
-    amount: totalPayable,
-    address,
+    const res = await axios.post(`${API}/api/v1/order/create-order`, finalData, {
+      headers: { Authorization: `Bearer ${auth?.token}` },
+    });
+
+    if (res.data.success) {
+      localStorage.removeItem("checkoutProduct");
+      localStorage.removeItem("checkoutCart");
+      localStorage.removeItem("cart");
+
+      setCart([]);
+      navigate("/order-success");
+    }
   };
 
-  const res = await axios.post(`${API}/api/v1/order/create-order`, finalData, {
-    headers: { Authorization: `Bearer ${auth?.token}` },
-  });
-
-  if (res.data.success) {
-    localStorage.removeItem("checkoutProduct");
-    localStorage.removeItem("checkoutCart");
-    localStorage.removeItem("cart");
-
-    setCart([]);
-    navigate("/order-success");
-  }
-};
-
-
-  // Final Button Handler
   const submitOrder = () => {
     if (payment === "cod") handleOrder("cod");
     else if (payment === "online") payWithRazorpay();
@@ -202,7 +215,7 @@ export default function Checkout() {
     <Layout>
       <div className="px-6 py-10 bg-black text-white min-h-screen pt-24">
 
-        {/* FREE SHIPPING BANNER */}
+        {/* FREE SHIPPING BAR */}
         <div className="bg-yellow-500 text-black py-2 text-center rounded-lg mb-6">
           {totalAmount >= FREE_SHIP_LIMIT
             ? "🎉 FREE SHIPPING APPLIED!"
@@ -212,23 +225,24 @@ export default function Checkout() {
         <h1 className="text-3xl font-bold text-yellow-500 mb-6">Checkout</h1>
 
         <div className="grid md:grid-cols-3 gap-8">
-          {/* LEFT PRODUCTS */}
+
+          {/* LEFT SIDE: PRODUCTS */}
           <div className="space-y-6">
             {products.map((p) => (
               <div key={p._id} className="bg-[#1e1e1e] p-5 rounded-xl">
                 <img
-                  src={`${API}/api/v1/product/product-photo/${p._id}`}
+                  src={`${API}/api/v1/product/product-photo/${p._id}?index=0`}
                   className="w-full h-48 object-cover rounded-xl"
                 />
                 <h2 className="text-lg font-bold mt-3">{p.name}</h2>
                 <p className="text-yellow-500 font-bold">
-                  ₹{p.price} × {p.qty || 1}
+                  ₹{p.price} × {p.qty}
                 </p>
               </div>
             ))}
 
             {/* PRICE SUMMARY */}
-            <div className="bg-[#1e1e1e] p-5 rounded-lg">
+            <div className="bg-[#1e1e1e] p-5 rounded-xl">
               <div className="flex gap-2 mb-3">
                 <input
                   className="flex-1 bg-[#222] p-2 rounded"
@@ -246,7 +260,10 @@ export default function Checkout() {
 
               <p>Items Total: ₹{totalAmount}</p>
               <p>Discount: ₹{discount}</p>
-              <p>Delivery: {deliveryCharge === 0 ? "FREE" : `₹${deliveryCharge}`}</p>
+              <p>
+                Delivery:{" "}
+                {deliveryCharge === 0 ? "FREE" : `₹${deliveryCharge}`}
+              </p>
 
               <hr className="my-3" />
 
@@ -256,6 +273,7 @@ export default function Checkout() {
 
           {/* RIGHT SIDE */}
           <div className="md:col-span-2 space-y-6">
+
             {/* ADDRESS */}
             <div className="bg-[#1c1c1c] p-6 rounded-xl">
               <h2 className="text-2xl font-semibold mb-4">Delivery Address</h2>
@@ -284,11 +302,9 @@ export default function Checkout() {
               >
                 Save Address
               </button>
-
-          
             </div>
 
-            {/* PAYMENT */}
+            {/* PAYMENT METHOD */}
             <div className="bg-[#1c1c1c] p-6 rounded-xl">
               <h2 className="text-2xl font-semibold mb-4">Payment Method</h2>
 
@@ -313,13 +329,14 @@ export default function Checkout() {
               </label>
             </div>
 
-            {/* PLACE ORDER */}
+            {/* ORDER BUTTON */}
             <button
               onClick={submitOrder}
               className="w-full bg-yellow-500 text-black font-bold py-4 rounded-lg text-xl"
             >
               Place Order 🚀
             </button>
+
           </div>
         </div>
       </div>

@@ -9,7 +9,7 @@ import toast from "react-hot-toast";
 // Icons
 import { FaShoppingCart } from "react-icons/fa";
 import { BsLightningChargeFill } from "react-icons/bs";
-import { FaHeart, FaRegHeart } from "react-icons/fa";   // ❤️ Wishlist Icons
+import { FaHeart, FaRegHeart } from "react-icons/fa";   
 import { useAuth } from "../context/auth";
 
 export default function Products() {
@@ -20,15 +20,13 @@ export default function Products() {
   const { search: queryString } = useLocation();
   const [auth] = useAuth();
 
-  const [wishlistIds, setWishlistIds] = useState([]); // ❤️ Wishlist IDs
+  const [wishlistIds, setWishlistIds] = useState([]);
 
   const query = new URLSearchParams(queryString);
   const gender = query.get("gender");
   const type = query.get("type");
 
-  /* ===============================
-     LOAD PRODUCTS
-  =============================== */
+  /* =============================== LOAD PRODUCTS =============================== */
   useEffect(() => {
     loadProducts();
   }, [gender, type]);
@@ -46,9 +44,7 @@ export default function Products() {
     }
   };
 
-  /* ===============================
-     LOAD WISHLIST (when user logged in)
-  =============================== */
+  /* =============================== LOAD WISHLIST =============================== */
   useEffect(() => {
     const loadWishlist = async () => {
       if (!auth?.token) return;
@@ -69,9 +65,7 @@ export default function Products() {
     loadWishlist();
   }, [auth?.token]);
 
-  /* ===============================
-     TOGGLE WISHLIST ❤️
-  =============================== */
+  /* =============================== TOGGLE WISHLIST ❤️ =============================== */
   const toggleWishlist = async (id) => {
     if (!auth?.token) return toast.error("Login required");
 
@@ -82,7 +76,6 @@ export default function Products() {
         { headers: { Authorization: auth.token } }
       );
 
-      // toggle locally
       if (wishlistIds.includes(id)) {
         setWishlistIds(wishlistIds.filter((x) => x !== id));
       } else {
@@ -93,49 +86,40 @@ export default function Products() {
     }
   };
 
-  /* ===============================
-     ADD TO CART
-  =============================== */
+  /* =============================== ADD TO CART =============================== */
   const addToCart = (p) => {
-  const productToAdd = {
-    _id: p._id,
-    name: p.name,
-    price: p.price,
-    qty: 1
+    const existing = cart.find((item) => item._id === p._id);
+
+    let updatedCart;
+
+    if (existing) {
+      updatedCart = cart.map((item) =>
+        item._id === p._id ? { ...item, qty: item.qty + 1 } : item
+      );
+    } else {
+      updatedCart = [...cart, { ...p, qty: 1 }];
+    }
+
+    setCart(updatedCart);
+    localStorage.setItem("cart", JSON.stringify(updatedCart));
+    toast.success("Added to cart");
   };
 
-  const existing = cart.find((item) => item._id === p._id);
+ /* =============================== BUY NOW =============================== */
+const handleBuyNow = (p) => {
+  // Clear cart-based checkout
+  localStorage.removeItem("cartCheckout");
 
-  let updatedCart;
+  // Buy now always 1 quantity (best UX)
+  const checkoutProduct = { ...p, qty: 1 };
 
-  if (existing) {
-    updatedCart = cart.map((item) =>
-      item._id === p._id ? { ...item, qty: item.qty + 1 } : item
-    );
-  } else {
-    updatedCart = [...cart, productToAdd];
-  }
+  localStorage.setItem("checkoutProduct", JSON.stringify(checkoutProduct));
 
-  setCart(updatedCart);
-  localStorage.setItem("cart", JSON.stringify(updatedCart));
-
-  toast.success("Added to cart");
+  navigate("/checkout");
 };
 
-  /* ===============================
-     BUY NOW
-  =============================== */
-  const handleBuyNow = (p) => {
-    localStorage.setItem(
-      "checkoutProduct",
-      JSON.stringify({ ...p, qty: 1 })
-    );
-    navigate("/checkout");
-  };
 
-  /* ===============================
-     SEARCH FILTER
-  =============================== */
+  /* =============================== SEARCH FILTER =============================== */
   const filteredProducts = products.filter((p) =>
     search.trim() === ""
       ? true
@@ -153,58 +137,108 @@ export default function Products() {
             placeholder="Search watches..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="bg-[#1a1a1a] text-white px-4 py-2 rounded-lg w-full md:w-64 border border-[#333] focus:outline-none focus:border-yellow-500"
+            className="bg-[#1a1a1a] text-white px-4 py-2 rounded-lg w-full md:w-64 
+                      border border-[#333] focus:outline-none focus:border-yellow-500"
           />
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-          {filteredProducts.map((p) => (
-            <div
-              key={p._id}
-              className="bg-[#1e1e1e] p-4 rounded-lg shadow hover:scale-105 transition transform border border-transparent hover:border-yellow-500 relative"
-            >
-              {/* ❤️ WISHLIST BUTTON */}
-              <button
-                onClick={() => toggleWishlist(p._id)}
-                className="absolute top-2 right-2 bg-black/50 rounded-full p-2 z-10"
+
+          {filteredProducts.map((p) => {
+            const existing = cart.find((item) => item._id === p._id);
+            const qty = existing ? existing.qty : 0;
+
+            return (
+              <div
+                key={p._id}
+                className="bg-[#1e1e1e] p-4 rounded-lg shadow hover:scale-105 transition transform border 
+                           border-transparent hover:border-yellow-500 relative"
               >
-                {wishlistIds.includes(p._id) ? (
-                  <FaHeart className="text-red-500 text-xl" />
-                ) : (
-                  <FaRegHeart className="text-white text-xl" />
-                )}
-              </button>
-
-              <img
-                src={`${API}/api/v1/product/product-photo/${p._id}`}
-                className="h-40 w-full object-cover rounded mb-3"
-                alt={p.name}
-              />
-
-              <h3 className="text-white text-lg font-semibold line-clamp-1">
-                {p.name}
-              </h3>
-              <p className="text-yellow-500 font-bold mb-3">₹{p.price}</p>
-
-              <div className="flex flex-col space-y-3">
+                {/* ❤️ WISHLIST BUTTON */}
                 <button
-                  onClick={() => addToCart(p)}
-                  className="w-full bg-yellow-500 text-black font-bold py-2 rounded-lg hover:bg-yellow-600 transition flex items-center justify-center gap-2"
+                  onClick={() => toggleWishlist(p._id)}
+                  className="absolute top-2 right-2 bg-black/50 rounded-full p-2 z-10"
                 >
-                  <FaShoppingCart />
-                  Add to Cart
+                  {wishlistIds.includes(p._id) ? (
+                    <FaHeart className="text-red-500 text-xl" />
+                  ) : (
+                    <FaRegHeart className="text-white text-xl" />
+                  )}
                 </button>
 
-                <button
-                  onClick={() => handleBuyNow(p)}
-                  className="w-full bg-[#333] text-white border border-yellow-500 py-2 rounded-lg hover:bg-[#444] transition flex items-center justify-center gap-2"
-                >
-                  <BsLightningChargeFill className="text-yellow-400" />
-                  Buy Now
-                </button>
+                <div onClick={() => navigate(`/product/${p.slug}`)} className="cursor-pointer">
+                  <img
+                    src={`${API}/api/v1/product/product-photo/${p._id}`}
+                    className="h-40 w-full object-cover rounded mb-3"
+                    alt={p.name}
+                  />
+                </div>
+
+                <h3 className="text-white text-lg font-semibold line-clamp-1">{p.name}</h3>
+                <p className="text-yellow-500 font-bold mb-3">₹{p.price}</p>
+
+                <div className="flex flex-col space-y-3">
+
+                  {/* ⭐ — ADD TO CART or – qty + UI here */}
+                  {qty === 0 ? (
+                    <button
+                      onClick={() => addToCart(p)}
+                      className="w-full bg-yellow-500 text-black font-bold py-2 rounded-lg hover:bg-yellow-600 
+                                 transition flex items-center justify-center gap-2"
+                    >
+                      <FaShoppingCart /> Add to Cart
+                    </button>
+                  ) : (
+                    <div className="flex items-center justify-between border border-yellow-500 
+                                    rounded-lg px-3 py-2 bg-black">
+                      
+                      {/* – BUTTON */}
+                      <button
+                        onClick={() => {
+                          const updated =
+                            qty === 1
+                              ? cart.filter((item) => item._id !== p._id)
+                              : cart.map((item) =>
+                                  item._id === p._id
+                                    ? { ...item, qty: item.qty - 1 }
+                                    : item
+                                );
+
+                          setCart(updated);
+                          localStorage.setItem("cart", JSON.stringify(updated));
+                        }}
+                        className="bg-gray-800 text-white px-3 py-1 rounded-full text-lg hover:bg-gray-700"
+                      >
+                        –
+                      </button>
+
+                      {/* QTY */}
+                      <span className="text-yellow-400 font-bold text-lg">{qty}</span>
+
+                      {/* + BUTTON */}
+                      <button
+                        onClick={() => addToCart(p)}
+                        className="bg-yellow-500 text-black px-3 py-1 rounded-full text-lg hover:bg-yellow-400"
+                      >
+                        +
+                      </button>
+                    </div>
+                  )}
+
+                  {/* BUY NOW */}
+                  <button
+                    onClick={() => handleBuyNow(p)}
+                    className="w-full bg-[#333] text-white border border-yellow-500 py-2 rounded-lg 
+                               hover:bg-[#444] transition flex items-center justify-center gap-2"
+                  >
+                    <BsLightningChargeFill className="text-yellow-400" />
+                    Buy Now
+                  </button>
+
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
 
           {filteredProducts.length === 0 && (
             <p className="text-gray-400 col-span-full text-center mt-10">

@@ -89,95 +89,94 @@ export default function CreateCategory() {
     }
   };
 
-  return (
-   <AdminLayout>
-        <h2 className="text-3xl font-bold text-yellow-500 text-center mb-6">
-          Manage Categories
-        </h2>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+return (
+  <AdminLayout>
+    <h2 className="text-3xl font-bold text-amber-400 text-center mb-6">
+      Manage Categories
+    </h2>
 
-          {/* ADD MAIN CATEGORY */}
-          <div className="p-6 bg-[#1a1a1a] rounded-xl shadow-lg">
-            <h3 className="text-xl text-yellow-400 mb-4">Add Main Category</h3>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
 
-            <form onSubmit={handleMainCategory}>
-              <input
-                type="text"
-                value={name}
-                required
-                onChange={(e) => setName(e.target.value)}
-                className="w-full bg-[#222] p-3 rounded mb-4"
-                placeholder="Enter Category Name"
-              />
+      {/* ADD MAIN CATEGORY */}
+      <div className="p-6 bg-[#0F0F0F] rounded-xl shadow-lg border border-[#333]">
+        <h3 className="text-xl text-amber-300 mb-4">Add Main Category</h3>
 
-              <button
-                type="submit"
-                className="bg-yellow-600 p-3 w-full rounded text-black font-bold"
-              >
-                Create
-              </button>
-            </form>
-          </div>
+        <form onSubmit={handleMainCategory}>
+          <input
+            type="text"
+            value={name}
+            required
+            onChange={(e) => setName(e.target.value)}
+            className="w-full bg-[#1A1A1A] text-white p-3 rounded mb-4 border border-[#333] focus:border-amber-400"
+            placeholder="Enter Category Name"
+          />
 
-          {/* ADD SUBCATEGORY */}
-          <div className="p-6 bg-[#1a1a1a] rounded-xl shadow-lg">
-            <h3 className="text-xl text-yellow-400 mb-4">Add Subcategory</h3>
+          <button
+            type="submit"
+            className="bg-amber-500 hover:bg-amber-400 p-3 w-full rounded text-black font-bold transition"
+          >
+            Create
+          </button>
+        </form>
+      </div>
 
-            {/* Select Main Category */}
-            <select
-              value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
-              className="w-full bg-[#222] p-3 rounded mb-4"
-            >
-              <option value="">Select Main Category</option>
-              {categories?.map((c) => (
-                <option key={c._id} value={c._id}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
+      {/* ADD SUBCATEGORY */}
+      <div className="p-6 bg-[#0F0F0F] rounded-xl shadow-lg border border-[#333]">
+        <h3 className="text-xl text-amber-300 mb-4">Add Subcategory</h3>
 
-            {/* Subcategory Input */}
-            <input
-              type="text"
-              value={subName}
-              required
-              onChange={(e) => setSubName(e.target.value)}
-              className="w-full bg-[#222] p-3 rounded mb-4"
-              placeholder="Enter Subcategory Name"
-            />
-
-            <button
-              onClick={handleSubCategory}
-              className="bg-blue-600 p-3 w-full rounded font-bold"
-            >
-              Add Subcategory
-            </button>
-          </div>
-        </div>
-
-        {/* SHOW ALL CATEGORIES + SUBS */}
-        <div className="mt-10 p-6 bg-[#1a1a1a] rounded-xl shadow-lg">
-          <h3 className="text-xl text-yellow-400 mb-4">All Categories</h3>
-
-          {categories.map((c) => (
-            <div key={c._id} className="mb-4">
-              <h4 className="text-lg font-bold text-yellow-500">{c.name}</h4>
-
-              {(!c.subcategories || c.subcategories.length === 0) ? (
-                <p className="text-gray-400 ml-4">— No subcategories</p>
-              ) : (
-                <ul className="ml-4 list-disc text-gray-300">
-                  {c.subcategories.map((sub, index) => (
-                    <li key={index}>{sub.name}</li>
-                  ))}
-                </ul>
-              )}
-            </div>
+        <select
+          value={selectedCategory}
+          onChange={(e) => setSelectedCategory(e.target.value)}
+          className="w-full bg-[#1A1A1A] text-white p-3 rounded mb-4 border border-[#333] focus:border-amber-400"
+        >
+          <option value="">Select Main Category</option>
+          {categories?.map((c) => (
+            <option key={c._id} value={c._id}>
+              {c.name}
+            </option>
           ))}
-        </div>
+        </select>
 
-      </AdminLayout>
-  );
+        <input
+          type="text"
+          value={subName}
+          required
+          onChange={(e) => setSubName(e.target.value)}
+          className="w-full bg-[#1A1A1A] text-white p-3 rounded mb-4 border border-[#333] focus:border-amber-400"
+          placeholder="Enter Subcategory Name"
+        />
+
+        <button
+          onClick={handleSubCategory}
+          className="bg-blue-600 hover:bg-blue-500 p-3 w-full rounded font-bold transition"
+        >
+          Add Subcategory
+        </button>
+      </div>
+    </div>
+
+    {/* SHOW ALL CATEGORIES */}
+    <div className="mt-10 p-6 bg-[#0F0F0F] rounded-xl shadow-lg border border-[#333]">
+      <h3 className="text-xl text-amber-300 mb-4">All Categories</h3>
+
+      {categories.map((c) => (
+        <div key={c._id} className="mb-4">
+          <h4 className="text-lg font-bold text-amber-400">{c.name}</h4>
+
+          {(!c.subcategories || c.subcategories.length === 0) ? (
+            <p className="text-gray-500 ml-4">— No subcategories</p>
+          ) : (
+            <ul className="ml-4 list-disc text-gray-300">
+              {c.subcategories.map((sub, index) => (
+                <li key={index}>{sub.name}</li>
+              ))}
+            </ul>
+          )}
+        </div>
+      ))}
+    </div>
+  </AdminLayout>
+);
+
 }

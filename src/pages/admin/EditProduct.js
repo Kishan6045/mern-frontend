@@ -23,9 +23,18 @@ export default function EditProduct() {
   const [category, setCategory] = useState("");
   const [shipping, setShipping] = useState("");
 
-  const [photo, setPhoto] = useState(null);
+  const [oldImages, setOldImages] = useState([]);
+  const [newImages, setNewImages] = useState([]);
+  const [deleteIndexes, setDeleteIndexes] = useState([]);
 
-  // Load categories
+  const removeOldImage = (i) => {
+    setDeleteIndexes((prev) => [...prev, i]);
+  };
+
+  const removeNewImage = (i) => {
+    setNewImages((prev) => prev.filter((_, idx) => idx !== i));
+  };
+
   const loadCategories = async () => {
     try {
       const { data } = await axios.get(`${API}/api/v1/category/get-category`);
@@ -35,7 +44,6 @@ export default function EditProduct() {
     }
   };
 
-  // Load product
   const loadProduct = async () => {
     try {
       const { data } = await axios.get(
@@ -45,14 +53,14 @@ export default function EditProduct() {
       if (data.success) {
         const p = data.product;
         setProductId(p._id);
+        setOldImages(p.images || []);
+
         setName(p.name);
         setDescription(p.description);
         setPrice(p.price);
         setQuantity(p.quantity);
         setCategory(p.category?._id || p.category);
         setShipping(p.shipping ? "1" : "0");
-      } else {
-        toast.error("Product not found");
       }
     } catch (error) {
       console.log("Product load error", error);
@@ -63,15 +71,10 @@ export default function EditProduct() {
   useEffect(() => {
     loadCategories();
     loadProduct();
-    // eslint-disable-next-line
   }, [slug]);
 
   const handleUpdate = async (e) => {
     e.preventDefault();
-
-    if (!name || !description || !price || !quantity || !category) {
-      return toast.error("All fields are required");
-    }
 
     try {
       const formData = new FormData();
@@ -82,159 +85,199 @@ export default function EditProduct() {
       formData.append("category", category);
       formData.append("shipping", shipping === "1");
 
-      if (photo) {
-        formData.append("photo", photo);
-      }
+      formData.append("deleteIndexes", JSON.stringify(deleteIndexes));
+
+      newImages.forEach((img) => {
+        formData.append("photos", img);
+      });
 
       const { data } = await axios.put(
         `${API}/api/v1/product/update-product/${productId}`,
         formData,
-        {
-          headers: {
-            Authorization: `Bearer ${auth?.token}`,
-          },
-        }
+        { headers: { Authorization: `Bearer ${auth?.token}` } }
       );
 
       if (data.success) {
-        toast.success("Product updated");
+        toast.success("Product updated successfully!");
         navigate("/dashboard/admin/products");
       } else {
         toast.error(data.message || "Update failed");
       }
     } catch (error) {
-      console.log("Update error", error);
+      console.log("Update Error", error);
       toast.error("Error updating product");
     }
   };
 
   return (
-   <AdminLayout>
-        <h1 className="text-3xl font-bold text-yellow-500 mb-6 text-center">
-          Edit Product
-        </h1>
+    <AdminLayout>
+      <h1 className="text-3xl font-bold text-yellow-400 mb-6 text-center">
+        Edit Product
+      </h1>
 
-        <form
-          onSubmit={handleUpdate}
-          className="max-w-3xl mx-auto bg-[#1a1a1a] p-6 rounded-xl shadow-lg"
-        >
-          {/* Photo */}
-          <div className="mb-4">
-            <label className="block mb-2 font-semibold">Product Photo</label>
-            <div className="flex items-center gap-4">
-              <label className="bg-gray-700 px-4 py-2 rounded cursor-pointer">
-                {photo ? "Change Photo" : "Upload New Photo"}
-                <input
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={(e) => setPhoto(e.target.files[0])}
-                />
-              </label>
+      <form
+        onSubmit={handleUpdate}
+        className="max-w-3xl mx-auto bg-[#141414] p-7 rounded-2xl shadow-xl border border-gray-800"
+      >
+        {/* PHOTOS */}
+        <div className="mb-6">
+          <label className="block mb-2 font-semibold text-gray-200 text-lg">
+            Product Photos
+          </label>
 
-              {/* Preview */}
-              <div>
-                {photo ? (
-                  <img
-                    src={URL.createObjectURL(photo)}
-                    alt="preview"
-                    className="w-24 h-24 object-cover rounded"
-                  />
-                ) : productId ? (
-                  <img
-                    src={`${API}/api/v1/product/product-photo/${productId}`}
-                    alt="current"
-                    className="w-24 h-24 object-cover rounded"
-                  />
-                ) : null}
-              </div>
-            </div>
-          </div>
-
-          {/* Name */}
-          <div className="mb-4">
-            <label className="block mb-1 font-semibold">Name</label>
+          <label className="bg-[#222] px-5 py-2 rounded-lg cursor-pointer border border-gray-700 hover:border-yellow-400 text-gray-300 mb-4 inline-block">
+            Upload New Photos
             <input
-              type="text"
-              className="w-full bg-[#222] p-3 rounded outline-none"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
+              type="file"
+              accept="image/*"
+              multiple
+              className="hidden"
+              onChange={(e) =>
+                setNewImages((prev) => [
+                  ...prev,
+                  ...Array.from(e.target.files),
+                ])
+              }
+            />
+          </label>
+
+          <div className="flex flex-wrap gap-4">
+            {/* OLD IMAGES */}
+            {oldImages
+              .filter((_, i) => !deleteIndexes.includes(i))
+              .map((img, index) => (
+                <div key={index} className="relative">
+                  <img
+                    src={`${API}/${img}`}
+                    className="w-24 h-24 rounded-lg object-cover border border-gray-700"
+                  />
+
+                  <button
+                    type="button"
+                    onClick={() => removeOldImage(index)}
+                    className="absolute -top-2 -right-2 bg-red-600 text-white rounded-full px-2 text-xs"
+                  >
+                    ✕
+                  </button>
+                </div>
+              ))}
+
+            {/* NEW IMAGES */}
+            {newImages.map((img, index) => (
+              <div key={index} className="relative">
+                <img
+                  src={URL.createObjectURL(img)}
+                  className="w-24 h-24 rounded-lg object-cover border border-gray-700"
+                />
+
+                <button
+                  type="button"
+                  onClick={() => removeNewImage(index)}
+                  className="absolute -top-2 -right-2 bg-red-600 text-white rounded-full px-2 text-xs"
+                >
+                  ✕
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* NAME */}
+        <div className="mb-5">
+          <label className="block mb-2 font-semibold text-gray-300">
+            Name
+          </label>
+          <input
+            type="text"
+            className="w-full bg-[#1f1f1f] border border-gray-700 text-white p-3 rounded-lg focus:border-yellow-400 outline-none"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
+        </div>
+
+        {/* DESCRIPTION */}
+        <div className="mb-5">
+          <label className="block mb-2 font-semibold text-gray-300">
+            Description
+          </label>
+          <textarea
+            className="w-full bg-[#1f1f1f] border border-gray-700 text-white p-3 rounded-lg focus:border-yellow-400 outline-none"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            rows={3}
+          ></textarea>
+        </div>
+
+        {/* PRICE + QUANTITY */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-5">
+          <div>
+            <label className="block mb-2 font-semibold text-gray-300">
+              Price (₹)
+            </label>
+            <input
+              type="number"
+              className="w-full bg-[#1f1f1f] border border-gray-700 text-white p-3 rounded-lg focus:border-yellow-400 outline-none"
+              value={price}
+              onChange={(e) => setPrice(e.target.value)}
             />
           </div>
 
-          {/* Description */}
-          <div className="mb-4">
-            <label className="block mb-1 font-semibold">Description</label>
-            <textarea
-              className="w-full bg-[#222] p-3 rounded outline-none"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              rows={3}
-            ></textarea>
+          <div>
+            <label className="block mb-2 font-semibold text-gray-300">
+              Quantity
+            </label>
+            <input
+              type="number"
+              className="w-full bg-[#1f1f1f] border border-gray-700 text-white p-3 rounded-lg focus:border-yellow-400 outline-none"
+              value={quantity}
+              onChange={(e) => setQuantity(e.target.value)}
+            />
+          </div>
+        </div>
+
+        {/* CATEGORY + SHIPPING */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-7">
+          <div>
+            <label className="block mb-2 font-semibold text-gray-300">
+              Category
+            </label>
+            <select
+              className="w-full bg-[#1f1f1f] border border-gray-700 text-white p-3 rounded-lg focus:border-yellow-400 outline-none"
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+            >
+              <option value="">Select Category</option>
+              {categories.map((c) => (
+                <option key={c._id} value={c._id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
           </div>
 
-          {/* Price + Qty */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-            <div>
-              <label className="block mb-1 font-semibold">Price (₹)</label>
-              <input
-                type="number"
-                className="w-full bg-[#222] p-3 rounded outline-none"
-                value={price}
-                onChange={(e) => setPrice(e.target.value)}
-              />
-            </div>
-
-            <div>
-              <label className="block mb-1 font-semibold">Quantity</label>
-              <input
-                type="number"
-                className="w-full bg-[#222] p-3 rounded outline-none"
-                value={quantity}
-                onChange={(e) => setQuantity(e.target.value)}
-              />
-            </div>
+          <div>
+            <label className="block mb-2 font-semibold text-gray-300">
+              Shipping
+            </label>
+            <select
+              className="w-full bg-[#1f1f1f] border border-gray-700 text-white p-3 rounded-lg focus:border-yellow-400 outline-none"
+              value={shipping}
+              onChange={(e) => setShipping(e.target.value)}
+            >
+              <option value="">Select</option>
+              <option value="1">Yes</option>
+              <option value="0">No</option>
+            </select>
           </div>
+        </div>
 
-          {/* Category + Shipping */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-            <div>
-              <label className="block mb-1 font-semibold">Category</label>
-              <select
-                className="w-full bg-[#222] p-3 rounded outline-none"
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-              >
-                <option value="">Select Category</option>
-                {categories.map((c) => (
-                  <option key={c._id} value={c._id}>
-                    {c.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block mb-1 font-semibold">Shipping</label>
-              <select
-                className="w-full bg-[#222] p-3 rounded outline-none"
-                value={shipping}
-                onChange={(e) => setShipping(e.target.value)}
-              >
-                <option value="">Select</option>
-                <option value="1">Yes</option>
-                <option value="0">No</option>
-              </select>
-            </div>
-          </div>
-
-          <button
-            type="submit"
-            className="w-full bg-yellow-500 text-black font-bold py-3 rounded-lg hover:bg-yellow-600"
-          >
-            Update Product ✅
-          </button>
-        </form>
+        <button
+          type="submit"
+          className="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-3 rounded-xl text-lg shadow-lg"
+        >
+          Update Product ✅
+        </button>
+      </form>
     </AdminLayout>
   );
 }

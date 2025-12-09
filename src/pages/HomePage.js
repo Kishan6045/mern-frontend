@@ -54,25 +54,28 @@ const HERO_SLIDES = [
 const CATEGORIES = [
   {
     title: "Men’s Watches",
-    img: "https://m.media-amazon.com/images/I/712Zc24+5wL._AC_UL480_FMwebp_QL65_.jpg",
+    img: "https://images.unsplash.com/photo-1524592094714-0f0654e20314",
     link: "/products?gender=men",
   },
   {
     title: "Women’s Watches",
-    img: "https://m.media-amazon.com/images/I/71dNQWf9YWL._AC_UL480_FMwebp_QL65_.jpg",
+    img: "https://images.unsplash.com/photo-1503387762-592deb58ef4e",
     link: "/products?gender=women",
   },
   {
     title: "Smart Watches",
-    img: "https://m.media-amazon.com/images/I/61X91w7Y3xL._AC_UL480_FMwebp_QL65_.jpg",
+    img: "https://images.unsplash.com/photo-1544117519-31a4b719223d",
     link: "/products?type=smart",
   },
   {
     title: "Classic Watches",
-    img: "https://m.media-amazon.com/images/I/71KhLDaXVgL._AC_UL480_FMwebp_QL65_.jpg",
+    img: "https://images.unsplash.com/photo-1523275335684-37898b6baf30",
     link: "/products?type=classic",
   },
 ];
+
+
+
 
 const WHY_POINTS = [
   { title: "100% Original Watches", desc: "All products are authenticated and passed through quality checks.", icon: "✅" },
@@ -212,6 +215,7 @@ export default function HomePage() {
                 img={cat.img}
                 onClick={() => navigate(cat.link)}
               />
+
             ))}
           </div>
         </section>
@@ -300,6 +304,8 @@ export default function HomePage() {
             product={quickViewProduct}
             onClose={closeQuickView}
             onAddToCart={addToCart}
+            cart={cart}
+            setCart={setCart}
           />
         )}
 

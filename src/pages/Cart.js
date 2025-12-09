@@ -136,13 +136,20 @@ export default function Cart() {
 
                             <button
                                 onClick={() => {
-                                    localStorage.setItem("checkoutCart", JSON.stringify(cart));
+                                    const updatedCart = cart.map((item) => ({
+                                        ...item,
+                                        qty: item.qty ? item.qty : 1,   // ⭐ REAL FIX: qty always stored
+                                    }));
+
+                                    localStorage.setItem("checkoutCart", JSON.stringify(updatedCart));
+                                    localStorage.removeItem("checkoutProduct"); // avoid Buy Now conflict
                                     navigate("/checkout");
                                 }}
                                 className="w-full bg-yellow-500 text-black font-bold py-2 rounded-lg hover:bg-yellow-600 transition"
                             >
                                 Proceed to Checkout →
                             </button>
+
 
                         </div>
 

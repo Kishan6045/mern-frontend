@@ -28,6 +28,8 @@ import AdminAnalytics from "./pages/admin/AdminAnalytics";
 import EditProduct from "./pages/admin/EditProduct";
 import ViewUser from "./pages/admin/ViewUser";
 import ScrollToTop from "./components/ScrollToTop";  
+import ProductPage from "./pages/ProductPage";
+
 
 
 
@@ -54,6 +56,8 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/product/:slug" element={<ProductPage />} />
+
 
           {/* USER ROUTES */}
           <Route path="/dashboard/user" element={<UserRoute><UserDashboard /></UserRoute>} />
